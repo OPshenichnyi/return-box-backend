@@ -1,8 +1,9 @@
 import express from "express"; // Імпортуємо бібліотеку експресс для створення WEB-SERVER
-import dotenv from "dotenv";
+import "dotenv/config";
 import logger from "morgan";
 
-dotenv.config();
+import authRouter from "./routes/auth-routers.js";
+
 const app = express(); // Викликаємо express та створюємо SERVER
 
 const formatsLogger = app.get("env") === "development" ? "dev" : "short";
