@@ -6,7 +6,7 @@ import Joi from "joi";
 // customer - sale product owner,
 // manager - create orders customer,
 // logist - delivery product
-const statusUser = ["register", "provider", "customer", "manager", "logist"];
+const statusUser = ["provider", "customer", "manager", "logist"];
 
 const emailRegexp = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
@@ -30,7 +30,6 @@ const userSchema = new Schema(
     subscription: {
       type: String,
       enum: statusUser,
-      default: "register",
     },
     verify: {
       type: Boolean,
