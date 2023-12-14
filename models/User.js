@@ -1,11 +1,13 @@
 import { Schema, model } from "mongoose";
 import Joi from "joi";
+import { handleSaveError, preUpdate } from "./hooks.js";
 
 // Have four type users hi have other rules acces:
 // provider - owner product,
 // customer - sale product owner,
 // manager - create orders customer,
 // logist - delivery product
+
 const statusUser = ["provider", "customer", "manager", "logist"];
 
 const emailRegexp = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -46,7 +48,9 @@ const userSchema = new Schema(
   },
   { versionKey: false, timestamps: true }
 );
-
+userSchema.post("save", handleSaveError);
+userSchema.pre("findOneAndUpdate", preUpdate);
+userSchema.post("findOneAndUpdate", handleSaveError);
 const User = model("user", userSchema);
 
 export default User;
@@ -55,7 +59,8 @@ export default User;
 //+ User schema Joi
 
 export const userSignupSchema = Joi.object({
-  email: Joi.string().email().required().messages({
+  userName: Joi.string().required(),
+  email: Joi.string().pattern(emailRegexp).required().messages({
     "any.required": "missing required email field",
   }),
   password: Joi.string().min(6).required(),
