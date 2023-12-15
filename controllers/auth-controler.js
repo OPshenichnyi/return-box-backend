@@ -33,6 +33,34 @@ const signup = async (req, res) => {
   });
 };
 
+const signin = async (req, res, next) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw HttpError(401, "Email or password is wrong");
+  }
+  if (!user.verify) {
+    throw HttpError(404, "User not found");
+  }
+  const passwordCompare = await bcrypt.compare(password, user.password);
+  if (!passwordCompare) {
+    throw HttpError(401, "Email or password is wrong");
+  }
+  const payload = {
+    id: user._id,
+  };
+
+  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "24h" });
+  await User.findByIdAndUpdate(user._id, { token });
+  res.json({
+    token,
+    user: {
+      email: user.email,
+      subscription: user.subscription,
+    },
+  });
+};
+
 const verifyEmail = async (req, res, next) => {
   const { verificationToken } = req.params;
   console.log(verificationToken);
@@ -69,8 +97,25 @@ const resendVerify = async (req, res, next) => {
   });
 };
 
+const getCurrent = async (req, res) => {
+  const { subscription, email } = req.user;
+  res.json({
+    email,
+    subscription,
+  });
+};
+
+const signout = async (req, res) => {
+  const { _id } = req.user;
+  await User.findByIdAndUpdate(_id, { token: "" });
+  res.status(204).json();
+};
+
 export default {
   signup: ctrlWrapper(signup),
   verifyEmail: ctrlWrapper(verifyEmail),
   resendVerify: ctrlWrapper(resendVerify),
+  signin: ctrlWrapper(signin),
+  getCurrent: ctrlWrapper(getCurrent),
+  signout: ctrlWrapper(signout),
 };

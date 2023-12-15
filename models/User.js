@@ -32,6 +32,7 @@ const userSchema = new Schema(
     subscription: {
       type: String,
       enum: statusUser,
+      require: [true, "Select type user"],
     },
     verify: {
       type: Boolean,
@@ -64,7 +65,10 @@ export const userSignupSchema = Joi.object({
     "any.required": "missing required email field",
   }),
   password: Joi.string().min(6).required(),
-  subscription: Joi.string().valid(...statusUser),
+  subscription: Joi.string()
+    .valid(...statusUser)
+    .required()
+    .messages({ "any.required": "Please select type user" }),
 });
 
 export const userSigninSchema = Joi.object({
